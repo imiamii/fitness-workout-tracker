@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitTrack</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand"><span class="dot"></span>FitTrack</div>
+      <div class="nav">
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="workout_creator.html">New Workout</a>
+        <a href="auth.html" id="authLink">Login</a>
+        <a href="#" id="logoutLink" style="display:none;">Logout</a>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card" style="grid-column: span 7;">
+        <h2>Track workouts. See progress. Keep it simple.</h2>
+        <p class="muted">
+          Simple fitness tracking to log workouts and monitor progress.
+        </p>
+        <div class="row" style="margin-top: 14px;">
+          <a class="btn" href="workout_creator.html">Start a workout</a>
+          <a class="btn secondary" href="dashboard.html">View dashboard</a>
+        </div>
+        <div class="footer-note" id="statusNote"></div>
+      </div>
+
+      <div class="card" style="grid-column: span 5;">
+        <h3>What you can do</h3>
+        <div class="divider"></div>
+
+        <div class="pill">🏋️ Beginner full-body workout (3× per week)</div>
+        <div style="height: 10px;"></div>
+
+        <div class="pill">🦵 Squats — 3 sets × 8–10 reps</div>
+        <div style="height: 10px;"></div>
+
+        <div class="pill">💪 Push-ups or bench press — 3×8–12</div>
+        <div style="height: 10px;"></div>
+
+        <div class="pill">🧘 Core & mobility — plank, stretching</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    const authed = !!getToken() && !!getUserId();
+    document.getElementById('authLink').style.display = authed ? 'none' : 'inline-flex';
+    document.getElementById('logoutLink').style.display = authed ? 'inline-flex' : 'none';
+    document.getElementById('logoutLink').onclick = (e) => { e.preventDefault(); logout(); };
+
+    setText('statusNote', authed ? 'You are logged in ✅' : 'You are not logged in yet. Use Login to start.');
+  </script>
+</body>
+</html>

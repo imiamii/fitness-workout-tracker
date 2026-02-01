@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitTrack | New Workout</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand"><span class="dot"></span>FitTrack</div>
+      <div class="nav">
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="workout_creator.html">New Workout</a>
+        <a href="#" id="logoutLink">Logout</a>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card" style="grid-column: span 5;">
+        <h2>Create workout</h2>
+        <p class="muted">Start a session, then add exercises as you go.</p>
+
+        <label class="tiny">Workout title</label>
+        <input class="input" id="title" placeholder="Leg day / Upper body / Cardio" />
+
+        <div class="row" style="margin-top: 14px;">
+          <button class="btn" onclick="startWorkout()">Start</button>
+          <a class="btn secondary" href="dashboard.html">Back</a>
+        </div>
+
+        <div class="msg" id="startMsg"></div>
+        <div class="footer-note">Tip: log in to save workouts to your account.</div>
+      </div>
+
+      <div class="card" style="grid-column: span 7;">
+        <h2>Add exercise</h2>
+        <p class="tiny">Add sets and reps to build your workout.</p>
+        <div class="divider"></div>
+
+        <div id="disabledBox" class="pill">Start a workout first…</div>
+
+        <div id="exerciseBox" style="display:none;">
+          <label class="tiny">Exercise name</label>
+          <input class="input" id="ex_name" placeholder="Bench press" />
+          <div style="height: 10px;"></div>
+
+          <div class="row">
+            <div>
+              <label class="tiny">Sets</label>
+              <input class="input" id="ex_sets" type="number" min="1" value="3" />
+            </div>
+            <div>
+              <label class="tiny">Reps</label>
+              <input class="input" id="ex_reps" type="number" min="1" value="10" />
+            </div>
+            <div>
+              <label class="tiny">Weight (kg)</label>
+              <input class="input" id="ex_weight" type="number" min="0" step="0.5" value="40" />
+            </div>
+          </div>
+
+          <div class="row" style="margin-top: 14px;">
+            <button class="btn" onclick="addExercise()">Add</button>
+            <button class="btn secondary" onclick="finish()">Finish</button>
+          </div>
+
+          <div class="msg" id="exMsg"></div>
+          <div class="divider"></div>
+          <div class="tiny muted">Exercises in this workout:</div>
+          <div id="exList" style="margin-top: 10px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    requireAuth();
+    document.getElementById('logoutLink').onclick = (e) => { e.preventDefault(); logout(); };
+
+    let currentWorkoutId = null;
+    let exercises = [];
+
+    function renderExercises() {
+      const el = document.getElementById('exList');
+      el.innerHTML = exercises.length
+        ? exercises.map((e, i) => `<div class="pill" style="margin-bottom:8px;">#${i+1} ${e.name} — ${e.sets}×${e.reps} @ ${e.weight}kg</div>`).join('')
+        : `<div class="tiny muted">No exercises added yet.</div>`;
+    }
+
+    async function startWorkout() {
+      const title = document.getElementById('title').value.trim();
+      const msg = document.getElementById('startMsg');
+      msg.className = 'msg';
+      msg.textContent = 'Working...';
+
+      if (!title) {
+        msg.className = 'msg bad';
+        msg.textContent = 'Please enter a title.';
+        return;
+      }
+
+      try {
+        const userId = getUserId();
+        const data = await api(`/users/${userId}/workouts`, {
+          method: 'POST',
+          body: JSON.stringify({ title })
+        });
+        currentWorkoutId = data.id;
+        exercises = [];
+
+        document.getElementById('disabledBox').style.display = 'none';
+        document.getElementById('exerciseBox').style.display = 'block';
+        msg.className = 'msg good';
+        msg.textContent = 'Workout created ✅ Now add exercises.';
+        renderExercises();
+      } catch (e) {
+        msg.className = 'msg bad';
+        msg.textContent = e.message;
+      }
+    }
+
+    async function addExercise() {
+      const exMsg = document.getElementById('exMsg');
+      exMsg.className = 'msg';
+      exMsg.textContent = 'Saving...';
+
+      if (!currentWorkoutId) {
+        exMsg.className = 'msg bad';
+        exMsg.textContent = 'Start a workout first.';
+        return;
+      }
+
+      const exercise = {
+        name: document.getElementById('ex_name').value.trim(),
+        sets: Number(document.getElementById('ex_sets').value),
+        reps: Number(document.getElementById('ex_reps').value),
+        weight: Number(document.getElementById('ex_weight').value)
+      };
+
+      if (!exercise.name) {
+        exMsg.className = 'msg bad';
+        exMsg.textContent = 'Exercise name is required.';
+        return;
+      }
+
+      try {
+        await api(`/workouts/${currentWorkoutId}/exercises`, {
+          method: 'PATCH',
+          body: JSON.stringify(exercise)
+        });
+        exercises.push(exercise);
+        renderExercises();
+        exMsg.className = 'msg good';
+        exMsg.textContent = 'Added ✅';
+        document.getElementById('ex_name').value = '';
+      } catch (e) {
+        exMsg.className = 'msg bad';
+        exMsg.textContent = e.message;
+      }
+    }
+
+    function finish() {
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+</body>
+</html>
