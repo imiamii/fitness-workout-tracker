@@ -5,14 +5,14 @@ Small fitness tracker web app where users can register/login, create workouts, a
 
 ## Tech: MongoDB (NoSQL), FastAPI (Python), plain HTML/CSS/JS frontend.
 
----
+
 
 ## System architecture
 **Frontend (HTML/JS)** → HTTP (fetch) → **FastAPI REST API** → **MongoDB** (Motor async driver).
 
 Authentication: JWT (stored in browser localStorage, sent as `Authorization: Bearer <token>`).
 
----
+
 
 ## Database schema
 
@@ -64,7 +64,7 @@ Indexes are created on backend startup:
 1) **Unique index** on `users.email` (prevents duplicate accounts)
 2) **Compound index** on `workouts (user_id, date)` for the main query pattern: “get my workouts sorted by newest”
 
----
+
 
 
 ### Authentication
@@ -88,7 +88,7 @@ Indexes are created on backend startup:
 ### Aggregation endpoint
 - `GET /analytics/summary/{user_id}` (multi-stage aggregation: total workouts, total volume, avg reps)
 
----
+
 
 ## MongoDB queries used (examples)
 
@@ -156,7 +156,7 @@ Open `fitness_app/frontend/index.html` with **VS Code Live Server** (recommended
 - Create a workout and add exercises
 - View dashboard stats + history
 
----
+
 
 ## Pages (frontend)
 Minimum required: **4 pages**
